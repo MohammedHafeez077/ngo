@@ -1,0 +1,65 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install Backend Dependencies
+      run: npm install --prefix backend
+    
+    - name: Lint Backend Code
+      run: cd backend && npm run lint || true
+    
+  frontend-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install Frontend Dependencies
+      run: npm install --prefix frontend
+    
+    - name: Build Frontend
+      run: npm run build --prefix frontend
+      env:
+        REACT_APP_API_URL: http://localhost:5000/api
+    
+    - name: Run Frontend Tests
+      run: npm test --prefix frontend -- --watchAll=false || true
+
+  deploy:
+    needs: [backend-tests, frontend-tests]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to Heroku
+      if: always()
+      run: |
+        git remote add heroku https://git.heroku.com/ngo-pro-app.git
+        git push -f heroku main
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}

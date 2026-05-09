@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: ngo-pro-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - ngo-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ngo-pro-backend
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      MONGO_URI: mongodb://admin:password@mongodb:27017/ngo-pro?authSource=admin
+      JWT_SECRET: your_jwt_secret_here
+      ADMIN_EMAIL: admin@ngo-pro.com
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+    depends_on:
+      - mongodb
+    networks:
+      - ngo-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ngo-pro-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:5000/api
+    depends_on:
+      - backend
+    networks:
+      - ngo-network
+
+volumes:
+  mongo_data:
+
+networks:
+  ngo-network:
+    driver: bridge

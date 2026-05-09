@@ -2,22 +2,26 @@
 .env
 .env.local
 .env.*.local
+.env.production.local
 
 # Dependencies
 node_modules/
 package-lock.json
 yarn.lock
 
-# Backend build/logs
+# Backend
 backend/node_modules/
 backend/uploads/*
 backend/*.log
+backend/.env
 
-# Frontend build
+# Frontend
 frontend/node_modules/
 frontend/build/
 frontend/dist/
 frontend/.cache
+frontend/.env
+frontend/.env.local
 
 # OS specific
 .DS_Store
@@ -27,16 +31,31 @@ Thumbs.db
 *~
 
 # IDE
-.vscode
-.idea
+.vscode/
+.idea/
 *.iml
-.env.local
+*.sublime-workspace
+*.sublime-project
 
 # Testing
 coverage/
 .nyc_output/
 
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
 # Misc
-.DS_Store
 .npm
 .eslintcache
+dist/
+build/

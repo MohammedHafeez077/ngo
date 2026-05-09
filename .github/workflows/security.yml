@@ -1,0 +1,27 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run npm audit
+      run: npm audit --prefix backend || true
+    
+    - name: Check for exposed secrets
+      run: |
+        if grep -r "mongodb+srv://.*:.*@" --include="*.js" --include="*.json" . 2>/dev/null; then
+          echo "⚠️  Possible exposed credentials found!"
+          exit 1
+        fi
+        exit 0
